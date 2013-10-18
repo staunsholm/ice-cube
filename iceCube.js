@@ -14,9 +14,68 @@ var geometry, material;
 var mouseX = 0, mouseY = 0;
 
 var ball, pad1, pad2;
+var oldt = 0;
+var ballX = 0;
+var ballY = 0;
+setBallDirection(3.14);
+var initialSpeed = 2;
+var speed = initialSpeed;
+var player1 = {
+    score: 0,
+    padSize: 800,
+    scoreElement: document.getElementById('player1score')
+};
+var player2 = {
+    score: 0,
+    padSize: 800,
+    scoreElement: document.getElementById('player2score')
+};
+var stopGame = false;
+
+var ballDirection;
+var ballDirectionX;
+var ballDirectionY;
+
+function setBallDirection(r) {
+    ballDirection = r;
+    ballDirectionX = Math.cos(ballDirection);
+    ballDirectionY = Math.sin(ballDirection);
+}
+
+var startGameButton = document.getElementById('startGameButton');
+var tryAgainButton = document.getElementById('tryAgainButton');
+
+startGameButton.addEventListener('click', startGame);
+tryAgainButton.addEventListener('click', startGame);
 
 init();
-animate();
+
+function startGame() {
+    document.getElementById('theGame').style.display = 'block';
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('gameOver').style.display = 'none';
+
+    playGameMusic();
+    animate();
+
+    player1 = {
+        score: 0,
+        pad: pad1,
+        padSize: 800,
+        scoreElement: document.getElementById('player1score'),
+        sound: dingSound
+    };
+    player1.scoreElement.innerHTML = "0";
+
+    player2 = {
+        score: 0,
+        pad: pad2,
+        padSize: 800,
+        scoreElement: document.getElementById('player2score'),
+        sound: dongSound
+    };
+    player2.scoreElement.innerHTML = "0";
+}
 
 function init() {
 
@@ -120,7 +179,7 @@ function init() {
     renderer.autoClear = false;
 
     // and dynamically attach this to the page body.
-    document.body.appendChild(renderer.domElement);
+    document.getElementById('theGame').appendChild(renderer.domElement);
 
     // we add several listeners for the mouse move and click
     document.addEventListener('mousemove', onDocumentMouseMove, false);
@@ -139,38 +198,15 @@ function onDocumentMouseMove(event) {
 function onDocumentMouseDown(event) {
 }
 
-var ballDirection;
-var ballDirectionX;
-var ballDirectionY;
-
-function setBallDirection(r) {
-    ballDirection = r;
-    ballDirectionX = Math.cos(ballDirection);
-    ballDirectionY = Math.sin(ballDirection);
-}
-
-var oldt = 0;
-var ballX = 0;
-var ballY = 0;
-setBallDirection(3.14);
-var initialSpeed = 2;
-var speed = initialSpeed;
-var player1 = {
-    score: 0,
-    pad: pad1,
-    padSize: 800
-};
-var player2 = {
-    score: 0,
-    pad: pad2,
-    padSize: 800
-};
-
 function padCheck(player, ball) {
     var dy = player.pad.position.y - ball.position.y;
 
     if (Math.abs(dy) > player.padSize) {
-        console.log("die");
+        playGameOverMusic();
+        stopGame = true;
+
+        document.getElementById('gameOver').style.display = 'block';
+        document.getElementById('theGame').style.display = 'none';
 
         speed = initialSpeed;
         ballX = 0;
@@ -179,17 +215,32 @@ function padCheck(player, ball) {
     }
     else {
         player.score++;
-        console.log(player.score);
+        player.scoreElement.innerHTML = player.score;
 
-
-        setBallDirection(ballDirection + Math.PI - dy/1000);
+        setBallDirection(ballDirection + Math.PI - dy / 1000);
 
         speed += 1;
+
+        player.sound.play();
     }
 }
 
 function animate(t) {
+    if (stopGame) {
+        stopGame = false;
+        return;
+    }
+
     requestAnimationFrame(animate);
+
+    // wait for sound to ready
+    if (!dingSound || !dongSound) {
+        return;
+    }
+    else {
+        player1.sound = dingSound;
+        player2.sound = dongSound;
+    }
 
     // we change the camera position based on the mouse move or click
     camera.position.x = mouseX * 8000;
