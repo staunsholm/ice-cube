@@ -50,6 +50,7 @@
             text-transform: uppercase;
             font-size: 10em;
             text-shadow: 0 0 10px rgb(0, 0, 0);
+            margin-bottom: 0;
         }
 
         button {
@@ -60,6 +61,34 @@
             border-radius: 10px;
             text-transform: uppercase;
         }
+        label {
+            display: block;
+            font-size: 2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgb(0, 0, 0);
+            margin-top: 1em;
+        }
+        select {
+            display: block;
+            margin: 0 auto;
+            border: 3px solid #ccc;
+            background-color: rgba(.3, .3, .3, .5);
+            font-size: 1em;
+            width: 10em;
+        }
+        option {
+        }
+
+        #backToStartButton {
+            padding: 5px 40px;
+            font-size: 4em;
+        }
+
+        h2 {
+            font-size: 10em;
+            text-shadow: 0 0 10px rgb(0, 0, 0);
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -67,11 +96,34 @@
 <div class="ui" id="startScreen">
     <h1>Ice Cube</h1>
     <button id="startGameButton">Start</button>
+    <label>
+        Goal
+        <select>
+            <option>First to 5</option>
+            <option>First to 10</option>
+            <option>First to 100</option>
+            <option>Play forever</option>
+        </select>
+    </label>
+
+    <label>
+        Difficulty
+        <select>
+            <option>Easy</option>
+            <option>Normal</option>
+            <option>Hard</option>
+            <option>Legendary</option>
+        </select>
+    </label>
 </div>
 
 <div class="ui" id="gameOver">
-    <h1>Game Over</h1>
+    <h1 id="gameOverWin">You Win!</h1>
+    <h1 id="gameOverLoose">You Loose...</h1>
+    <h1 id="gameOverDraw">It's A Draw!</h1>
+    <h2 id="finalScore"></h2>
     <button id="tryAgainButton">Try Again</button>
+    <button id="backToStartButton">Back To Start Screen</button>
 </div>
 
 <div id="theGame">

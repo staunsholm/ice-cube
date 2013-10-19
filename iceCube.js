@@ -17,7 +17,7 @@ var ball, pad1, pad2;
 var oldt = 0;
 var ballX = 0;
 var ballY = 0;
-setBallDirection(3.14);
+setBallDirection(3.14 + Math.random() - 0.5);
 var initialSpeed = 2;
 var speed = initialSpeed;
 var player1 = {
@@ -47,6 +47,12 @@ var tryAgainButton = document.getElementById('tryAgainButton');
 
 startGameButton.addEventListener('click', startGame);
 tryAgainButton.addEventListener('click', startGame);
+
+document.getElementById('backToStartButton').addEventListener('click', function () {
+    document.getElementById('theGame').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'block';
+    document.getElementById('gameOver').style.display = 'none';
+});
 
 init();
 
@@ -198,20 +204,29 @@ function onDocumentMouseMove(event) {
 function onDocumentMouseDown(event) {
 }
 
+function gameOver() {
+    playGameOverMusic();
+
+    var win = player1.score > player2.score;
+    document.getElementById('gameOverWin').style.display = player1.score > player2.score ? 'block' : 'none';
+    document.getElementById('gameOverLoose').style.display = player1.score < player2.score ? 'block' : 'none';
+    document.getElementById('gameOverDraw').style.display = player1.score === player2.score ? 'block' : 'none';
+    document.getElementById('finalScore').innerHTML = player1.score + " - " + player2.score;
+    document.getElementById('gameOver').style.display = 'block';
+    document.getElementById('theGame').style.display = 'none';
+
+    speed = initialSpeed;
+    ballX = 0;
+    ballY = 0;
+    setBallDirection(3.14 + Math.random() - 0.5);
+}
+
 function padCheck(player, ball) {
     var dy = player.pad.position.y - ball.position.y;
 
     if (Math.abs(dy) > player.padSize) {
-        playGameOverMusic();
         stopGame = true;
-
-        document.getElementById('gameOver').style.display = 'block';
-        document.getElementById('theGame').style.display = 'none';
-
-        speed = initialSpeed;
-        ballX = 0;
-        ballY = 0;
-        setBallDirection(3.14);
+        gameOver();
     }
     else {
         player.score++;
