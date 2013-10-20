@@ -31,6 +31,7 @@ var player2 = {
     scoreElement: document.getElementById('player2score')
 };
 var stopGame = false;
+var startCountTimer;
 
 var ballDirection;
 var ballDirectionX;
@@ -63,6 +64,8 @@ function startGame() {
 
     playGameMusic();
     animate();
+
+    startCountTimer = Date.now();
 
     player1 = {
         score: 0,
@@ -248,7 +251,17 @@ function animate(t) {
 
     requestAnimationFrame(animate);
 
-    // wait for sound to ready
+    // start counter
+    if (startCountTimer && Date.now() - startCountTimer < 3000) {
+        var cnt = Math.ceil((3000 - (Date.now() - startCountTimer)) / 1000);
+        document.getElementById('counter').innerHTML = cnt;
+        return;
+    }
+    else {
+        document.getElementById('counter').innerHTML = "";
+    }
+
+    // wait for sound to be ready
     if (!dingSound || !dongSound) {
         return;
     }
