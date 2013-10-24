@@ -94,7 +94,7 @@ var urls = [
 ];
 
 var textureCube = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping());
-var material = new THREE.MeshLambertMaterial({ color: 0xaaccff, envMap: textureCube, refractionRatio: 0.95 });
+material = new THREE.MeshLambertMaterial({ color: 0xaaccff, envMap: textureCube, refractionRatio: 0.95 });
 
 var modifier = new THREE.SubdivisionModifier(2);
 geometry = new THREE.CubeGeometry(200, 200, 200, 2, 2, 2);
