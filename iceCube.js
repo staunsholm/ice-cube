@@ -1,6 +1,5 @@
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-
 var scene, camera, renderer;
 var cameraCube, sceneCube;
 var cubes = [];
@@ -187,9 +186,16 @@ function padCheck(player, ball) {
         player.score++;
         player.scoreElement.innerHTML = player.score;
 
-        setBallDirection(ballDirection + Math.PI - dy / 1000);
+        var newDirection = ballDirection + Math.PI - dy / 1000;
+        if (newDirection > Math.PI / 2 - .5 && newDirection < Math.PI / 2 + .5) {
+            newDirection = newDirection > Math.PI / 2 ? Math.PI / 2 + .5 : Math.PI / 2 - .5;
+        }
+        else if (newDirection > Math.PI * 1.5 - .5 && newDirection < Math.PI * 1.5 + .5) {
+            newDirection = newDirection > Math.PI ? Math.PI * 1.5 + .5 : Math.PI * 1.5 - .5;
+        }
+        setBallDirection(newDirection);
 
-        speed += 1;
+        speed += .3;
 
         player.sound.play();
     }
@@ -237,9 +243,13 @@ function animate(t) {
     // computer player
     pad2.position.y += (ballY - pad2.position.y) * .05;
 
-    var dt = (t - oldt) * speed;
+    var dt = (t - oldt) * speed * speedMultiplier;
     if (!dt) dt = 0;
     oldt = t;
+
+    dt += Math.sin(t/100) * speedWobble;
+
+    console.log(speedMultiplier, speedWobble);
 
     ballX += dt * ballDirectionX;
     ballY += dt * ballDirectionY;
