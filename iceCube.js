@@ -170,7 +170,7 @@ function gameOver() {
     document.getElementById('gameOver').style.display = 'block';
     document.getElementById('theGame').style.display = 'none';
 
-    speed = initialSpeed;
+    speed = 0;
     ballX = 0;
     ballY = 0;
     setBallDirection(3.14 + Math.random() - 0.5);
@@ -234,6 +234,9 @@ function animate(t) {
 
     pad1.position.y = -mouseY * 3500;
 
+    // computer player
+    pad2.position.y += (ballY - pad2.position.y) * .05;
+
     var dt = (t - oldt) * speed;
     if (!dt) dt = 0;
     oldt = t;
@@ -265,8 +268,6 @@ function animate(t) {
 
     ball.position.x = ballX;
     ball.position.y = ballY;
-
-    pad2.position.y = ballY;
 
     renderer.render(sceneCube, cameraCube);
     renderer.render(scene, camera);
