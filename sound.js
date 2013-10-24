@@ -55,6 +55,10 @@ soundManager.setup({
     // where to find the SWF files, if needed
     url: 'lib/soundmanager2/swf',
 
+    debugMode: false,
+    debugFlash: false,
+    consoleOnly: true,
+
     // if you'd rather have 100% HTML5 mode (where supported)
     preferFlash: false,
 

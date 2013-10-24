@@ -1,18 +1,12 @@
-// Detect if the browser support WebGL. If not just show a little message, and try to help the user.
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 
 var scene, camera, renderer;
-
-// this camera and scene are for creating a background.
 var cameraCube, sceneCube;
-
 var cubes = [];
-
 var geometry, material;
-
 var mouseX = 0, mouseY = 0;
-
+var counter = document.getElementById('counter');
 var ball, pad1, pad2;
 var oldt = 0;
 var ballX = 0;
@@ -32,7 +26,6 @@ var player2 = {
 };
 var stopGame = false;
 var startCountTimer;
-
 var ballDirection;
 var ballDirectionX;
 var ballDirectionY;
@@ -55,15 +48,13 @@ document.getElementById('backToStartButton').addEventListener('click', function 
     document.getElementById('gameOver').style.display = 'none';
 });
 
-init();
-
 function startGame() {
     document.getElementById('theGame').style.display = 'block';
     document.getElementById('startScreen').style.display = 'none';
     document.getElementById('gameOver').style.display = 'none';
 
     playGameMusic();
-    animate();
+    animate(0);
 
     startCountTimer = Date.now();
 
@@ -86,114 +77,79 @@ function startGame() {
     player2.scoreElement.innerHTML = "0";
 }
 
-function init() {
+camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
+camera.position.z = -5000;
 
-    // we create a perspective camera to our world
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
-    camera.position.z = -5000;
+cameraCube = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
 
-    // we create a perspective camera to the cube world
-    cameraCube = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
+scene = new THREE.Scene();
+sceneCube = new THREE.Scene();
 
-    // two scenes
-    scene = new THREE.Scene();
-    sceneCube = new THREE.Scene();
+var path = "textures/Roundabout256/";
+var format = '.jpg';
+var urls = [
+    path + 'posx' + format, path + 'negx' + format,
+    path + 'posy' + format, path + 'negy' + format,
+    path + 'posz' + format, path + 'negz' + format
+];
 
-    // here we load the 6 textures that are the six faces of the cube map
-    var path = "textures/Roundabout256/";
-    var format = '.jpg';
-    var urls = [
-        path + 'posx' + format, path + 'negx' + format,
-        path + 'posy' + format, path + 'negy' + format,
-        path + 'posz' + format, path + 'negz' + format
-    ];
+var textureCube = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping());
+var material = new THREE.MeshLambertMaterial({ color: 0xaaccff, envMap: textureCube, refractionRatio: 0.95 });
 
-    // To construct a texture cube, we pass the urls, and say what kind of cube we want. Refaction is this case.
-    var textureCube = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping());
-    // this texture cube is goint to be used to create a material for the icecubes.
-    // An environment map, that the cubes are going to refract.
-    var material = new THREE.MeshLambertMaterial({ color: 0xaaccff, envMap: textureCube, refractionRatio: 0.95 });
+var modifier = new THREE.SubdivisionModifier(2);
+geometry = new THREE.CubeGeometry(200, 200, 200, 2, 2, 2);
+geometry.mergeVertices();
+geometry.computeCentroids();
+geometry.computeFaceNormals();
+geometry.computeVertexNormals();
+modifier.modify(geometry);
 
-    // for the icecubes gemotry, we are going to smooth out th edges.
-    // We initialize a geometry modifier with the number of subdivisions that we want.
-    var modifier = new THREE.SubdivisionModifier(2);
-    // creating a cube geometry with 2 subdivisions.
-    geometry = new THREE.CubeGeometry(200, 200, 200, 2, 2, 2);
-    // mergeVertices(); is run in case of duplicated vertices
-    geometry.mergeVertices();
-    geometry.computeCentroids();
-    geometry.computeFaceNormals();
-    geometry.computeVertexNormals();
-    // we use it to modify the geometry of the cube and smooth out the edges.
-    // to see it visually go to :
-    // http://mrdoob.github.com/three.js/examples/webgl_geometry_subdivision.html
-    modifier.modify(geometry);
+function createCube(x, y, z, w, h) {
+    var iceMesh = new THREE.Mesh(geometry, material);
 
-    // now we can create the mesh for our icecubes.
-    function createCube(x, y, z, w, h) {
-        var iceMesh = new THREE.Mesh(geometry, material);
+    iceMesh.position.x = x;
+    iceMesh.position.y = y;
+    iceMesh.position.z = z;
+    iceMesh.scale.x = w;
+    iceMesh.scale.y = h;
 
-        iceMesh.position.x = x;
-        iceMesh.position.y = y;
-        iceMesh.position.z = z;
-        iceMesh.scale.x = w;
-        iceMesh.scale.y = h;
+    scene.add(iceMesh);
+    cubes.push(iceMesh);
 
-        // we add each mesh to the scene
-        scene.add(iceMesh);
-        // and save it in the array to update them later.
-        cubes.push(iceMesh);
-
-        return iceMesh;
-    }
-
-    pad1 = createCube(-2600, 0, 1, 1, 8);
-    pad2 = createCube(2600, 0, 1, 1, 8);
-    ball = createCube(0, 0, 1, 1, 1);
-
-    // this point light is to mimic the sun.
-    var pointLight = new THREE.PointLight(0xffffff, 2, 0);
-    // we cheat and locate this light more or less where
-    // we have the sun in the image to make it more realistic.
-    pointLight.position.set(0, 10000, 10000);
-    var ambientLight = new THREE.AmbientLight(0xffffff);
-    // we add both lights to the scene
-    scene.add(pointLight);
-    scene.add(ambientLight);
-
-    // Background shader
-    // instead of making our own shader, we use the cube shader from threejs lib
-    var shader = THREE.ShaderLib[ "cube" ];
-    // we just configure the shader with our texture
-    shader.uniforms[ "tCube" ].value = textureCube;
-
-    // and create a material based on this shader.
-    var material = new THREE.ShaderMaterial({
-
-        fragmentShader: shader.fragmentShader,
-        vertexShader: shader.vertexShader,
-        uniforms: shader.uniforms,
-        depthWrite: false,
-        side: THREE.BackSide
-
-    });
-
-    // the cube with this shader material
-    var mesh = new THREE.Mesh(new THREE.CubeGeometry(100, 100, 100), material);
-    sceneCube.add(mesh);
-
-    // we set up a WebGL renderer
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.autoClear = false;
-
-    // and dynamically attach this to the page body.
-    document.getElementById('theGame').appendChild(renderer.domElement);
-
-    // we add several listeners for the mouse move and click
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
-    document.addEventListener('mousedown', onDocumentMouseDown, false);
+    return iceMesh;
 }
+
+pad1 = createCube(-2600, 0, 1, 1, 8);
+pad2 = createCube(2600, 0, 1, 1, 8);
+ball = createCube(0, 0, 1, 1, 1);
+
+var pointLight = new THREE.PointLight(0xffffff, 2, 0);
+pointLight.position.set(0, 10000, 10000);
+var ambientLight = new THREE.AmbientLight(0xffffff);
+
+scene.add(pointLight);
+scene.add(ambientLight);
+
+var shader = THREE.ShaderLib[ "cube" ];
+shader.uniforms[ "tCube" ].value = textureCube;
+
+material = new THREE.ShaderMaterial({
+    fragmentShader: shader.fragmentShader,
+    vertexShader: shader.vertexShader,
+    uniforms: shader.uniforms,
+    depthWrite: false,
+    side: THREE.BackSide
+});
+
+var mesh = new THREE.Mesh(new THREE.CubeGeometry(100, 100, 100), material);
+sceneCube.add(mesh);
+
+renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.autoClear = false;
+
+document.getElementById('theGame').appendChild(renderer.domElement);
+document.addEventListener('mousemove', onDocumentMouseMove, false);
 
 function onDocumentMouseMove(event) {
     mouseX = event.clientX / window.innerWidth - .5;
@@ -204,13 +160,9 @@ function onDocumentMouseMove(event) {
     else if (mouseY > .5) mouseY = .5;
 }
 
-function onDocumentMouseDown(event) {
-}
-
 function gameOver() {
     playGameOverMusic();
 
-    var win = player1.score > player2.score;
     document.getElementById('gameOverWin').style.display = player1.score > player2.score ? 'block' : 'none';
     document.getElementById('gameOverLoose').style.display = player1.score < player2.score ? 'block' : 'none';
     document.getElementById('gameOverDraw').style.display = player1.score === player2.score ? 'block' : 'none';
@@ -252,13 +204,17 @@ function animate(t) {
     requestAnimationFrame(animate);
 
     // start counter
-    if (startCountTimer && Date.now() - startCountTimer < 3000) {
-        var cnt = Math.ceil((3000 - (Date.now() - startCountTimer)) / 1000);
-        document.getElementById('counter').innerHTML = cnt;
-        return;
-    }
-    else {
-        document.getElementById('counter').innerHTML = "";
+    if (startCountTimer) {
+        if (Date.now() - startCountTimer < 3000) {
+            var cnt = Math.ceil((3000 - (Date.now() - startCountTimer)) / 1000);
+            counter.innerHTML = cnt;
+            speed = 0;
+        }
+        else {
+            counter.innerHTML = "";
+            speed = initialSpeed;
+            startCountTimer = null;
+        }
     }
 
     // wait for sound to be ready
@@ -270,14 +226,10 @@ function animate(t) {
         player2.sound = dongSound;
     }
 
-    // we change the camera position based on the mouse move or click
     camera.position.x = mouseX * 8000;
     camera.position.y = mouseY * 4000;
     camera.position.z = 5000;
-    // but we make the camera alwat look at the origin of the scene
     camera.lookAt(scene.position);
-    // we copy the camera rotation to the camera of the background
-    // so they will keep in sync
     cameraCube.rotation.copy(camera.rotation);
 
     pad1.position.y = -mouseY * 3500;
@@ -316,8 +268,6 @@ function animate(t) {
 
     pad2.position.y = ballY;
 
-    // we must render the background first!
     renderer.render(sceneCube, cameraCube);
-    // and then render the scene with the cubes.
     renderer.render(scene, camera);
 }
