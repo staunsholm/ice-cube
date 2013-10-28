@@ -28,6 +28,7 @@ var startCountTimer;
 var ballDirection;
 var ballDirectionX;
 var ballDirectionY;
+var maxScore = 5;
 
 function setBallDirection(r) {
     ballDirection = r;
@@ -164,10 +165,18 @@ function gameOver() {
 
     document.getElementById('gameOverWin').style.display = player1.score > player2.score ? 'block' : 'none';
     document.getElementById('gameOverLoose').style.display = player1.score < player2.score ? 'block' : 'none';
-    document.getElementById('gameOverDraw').style.display = player1.score === player2.score ? 'block' : 'none';
     document.getElementById('finalScore').innerHTML = player1.score + " - " + player2.score;
     document.getElementById('gameOver').style.display = 'block';
     document.getElementById('theGame').style.display = 'none';
+
+    speed = 0;
+    ballX = 0;
+    ballY = 0;
+    setBallDirection(3.14 + Math.random() - 0.5);
+}
+
+function newRound() {
+    startCountTimer = Date.now();
 
     speed = 0;
     ballX = 0;
@@ -179,26 +188,35 @@ function padCheck(player, ball) {
     var dy = player.pad.position.y - ball.position.y;
 
     if (Math.abs(dy) > player.padSize) {
-        stopGame = true;
-        gameOver();
-    }
-    else {
-        player.score++;
-        player.scoreElement.innerHTML = player.score;
-
-        var newDirection = ballDirection + Math.PI - dy / 1000;
-        if (newDirection > Math.PI / 2 - .5 && newDirection < Math.PI / 2 + .5) {
-            newDirection = newDirection > Math.PI / 2 ? Math.PI / 2 + .5 : Math.PI / 2 - .5;
+        if (player === player1) {
+            player2.score++;
         }
-        else if (newDirection > Math.PI * 1.5 - .5 && newDirection < Math.PI * 1.5 + .5) {
-            newDirection = newDirection > Math.PI ? Math.PI * 1.5 + .5 : Math.PI * 1.5 - .5;
+        else {
+            player1.score++;
         }
-        setBallDirection(newDirection);
 
-        speed += .3;
+        if (player1.score >= maxScore || player2.score >= maxScore) {
+            gameOver();
+        }
 
-        player.sound.play();
+        player1.scoreElement.innerHTML = player1.score;
+        player2.scoreElement.innerHTML = player2.score;
+
+        newRound();
     }
+
+    var newDirection = ballDirection + Math.PI - dy / 1000;
+    if (newDirection > Math.PI / 2 - .5 && newDirection < Math.PI / 2 + .5) {
+        newDirection = newDirection > Math.PI / 2 ? Math.PI / 2 + .5 : Math.PI / 2 - .5;
+    }
+    else if (newDirection > Math.PI * 1.5 - .5 && newDirection < Math.PI * 1.5 + .5) {
+        newDirection = newDirection > Math.PI ? Math.PI * 1.5 + .5 : Math.PI * 1.5 - .5;
+    }
+    setBallDirection(newDirection);
+
+    speed += .3;
+
+    player.sound.play();
 }
 
 function animate(t) {
@@ -238,9 +256,9 @@ function animate(t) {
 
     dt += Math.sin(t / 100) * speedWobble;
 
-    camera.position.x = Math.cos(t/5000) * 8000;
+    camera.position.x = Math.cos(t / 5000) * 8000;
     camera.position.y = mouseY * 4000;
-    camera.position.z = Math.sin(t/5000) * 8000;
+    camera.position.z = Math.sin(t / 5000) * 8000;
     camera.lookAt(scene.position);
     cameraCube.rotation.copy(camera.rotation);
 
@@ -283,5 +301,3 @@ function animate(t) {
     renderer.render(sceneCube, cameraCube);
     renderer.render(scene, camera);
 }
-
-console.log("test");
