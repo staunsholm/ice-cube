@@ -26,7 +26,7 @@ function playGameMusic() {
             currentlyPlayingMusic.stop();
         }
         currentlyPlayingMusic = sound;
-        sound.play();
+//        sound.play();
     });
 }
 
@@ -41,7 +41,7 @@ function playGameOverMusic() {
             currentlyPlayingMusic.stop();
         }
         currentlyPlayingMusic = sound;
-        sound.play();
+//        sound.play();
     });
 }
 

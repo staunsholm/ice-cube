@@ -84,7 +84,7 @@ cameraCube = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHei
 scene = new THREE.Scene();
 sceneCube = new THREE.Scene();
 
-var path = "textures/Roundabout256/";
+var path = "textures/SaintPetersBasilica/";
 var format = '.jpg';
 var urls = [
     path + 'posx' + format, path + 'negx' + format,
@@ -140,8 +140,8 @@ material = new THREE.ShaderMaterial({
     side: THREE.BackSide
 });
 
-var mesh = new THREE.Mesh(new THREE.CubeGeometry(100, 100, 100), material);
-sceneCube.add(mesh);
+var boxMesh = new THREE.Mesh(new THREE.CubeGeometry(1000, 100, 100), material);
+sceneCube.add(boxMesh);
 
 renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -232,9 +232,15 @@ function animate(t) {
         player2.sound = dongSound;
     }
 
-    camera.position.x = mouseX * 8000;
+    var dt = (t - oldt) * speed * speedMultiplier;
+    if (!dt) dt = 0;
+    oldt = t;
+
+    dt += Math.sin(t / 100) * speedWobble;
+
+    camera.position.x = Math.cos(t/5000) * 8000;
     camera.position.y = mouseY * 4000;
-    camera.position.z = 5000;
+    camera.position.z = Math.sin(t/5000) * 8000;
     camera.lookAt(scene.position);
     cameraCube.rotation.copy(camera.rotation);
 
@@ -243,14 +249,7 @@ function animate(t) {
     // computer player
     pad2.position.y += (ballY - pad2.position.y) * .05;
 
-    var dt = (t - oldt) * speed * speedMultiplier;
-    if (!dt) dt = 0;
-    oldt = t;
-
-    dt += Math.sin(t/100) * speedWobble;
-
-    console.log(speedMultiplier, speedWobble);
-
+    // ball
     ballX += dt * ballDirectionX;
     ballY += dt * ballDirectionY;
 
@@ -279,6 +278,10 @@ function animate(t) {
     ball.position.x = ballX;
     ball.position.y = ballY;
 
+    ball.rotation.y += .05;
+
     renderer.render(sceneCube, cameraCube);
     renderer.render(scene, camera);
 }
+
+console.log("test");

@@ -14,7 +14,7 @@ var powerUps = [
     },
     {
         duration: 8000,
-        label: 'Speed noraml'
+        label: 'Speed normal'
     },
     {
         duration: 5000,
