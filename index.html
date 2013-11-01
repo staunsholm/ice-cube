@@ -14,7 +14,7 @@
         .score {
             position: absolute;
             top: 30%;
-            font-family: Verdana;
+            font-family: Verdana, sans-serif;
             font-size: 20em;
             color: #fff;
             text-shadow: 0 0 10px rgb(0, 0, 0);
@@ -23,7 +23,7 @@
         #counter {
             position: absolute;
             top: 30%;
-            font-family: Verdana;
+            font-family: Verdana, sans-serif;
             font-size: 25em;
             color: #fe3040;
             text-shadow: 0 0 10px rgb(0, 0, 0);
@@ -60,6 +60,10 @@
         }
 
         #theGame {
+            display: none;
+        }
+
+        #noWebGL {
             display: none;
         }
 
@@ -122,6 +126,11 @@
             margin: 0;
         }
 
+        h3 {
+            font-size: 4em;
+            text-shadow: 0 0 10px rgb(0, 0, 0);
+        }
+
         .credits {
             margin-top: 2em;
             font-size: 1.5em;
@@ -175,7 +184,7 @@
             <a href="https://twitter.com/thisisnolimits" target="_blank">No Limits</a>
         </li>
         <li>
-            Sounds are from <a href="" target="_blank">SoundBible.com</a>
+            Sounds are from <a href="http://www.soundbible.com" target="_blank">SoundBible.com</a>
             under a Creative Commons <a href="http://creativecommons.org/licenses/sampling+/1.0/" target="_blank">license</a>
         </li>
         <li>
@@ -197,6 +206,12 @@
     <button id="backToStartButton">Back To Start Screen</button>
 </div>
 
+<div class="ui" id="noWebGL">
+    <h1>Rats</h1>
+    <h3>Seems like the game does not really work in your browser.</h3>
+    <h3>Please, <a href="http://get.webgl.org/">try another one...</a></h3>
+</div>
+
 <div id="theGame">
     <div id="player1score" class="score">0</div>
     <div id="player2score" class="score">0</div>
@@ -211,7 +226,8 @@
 
 <script src="sound.js"></script>
 <script src="powerUps.js"></script>
-<script src="iceCube.js"></script>
+<script src="Main.js"></script>
+<script src="Loop.js"></script>
 
 <div id="soundcloud"></div>
 

@@ -35,7 +35,7 @@ module.exports = function (grunt) {
                     path: '/usr/local/projects/ice-cube/',
                     username: 'root',
                     //password: '',
-                    privateKey: grunt.file.read("./MikkelStaunsholm.pem"),
+                    privateKey: null,//grunt.file.read("./MikkelStaunsholm.pem"),
                     //passphrase: '',
                     host: 'ec2-54-229-69-55.eu-west-1.compute.amazonaws.com',
                     createDirectories: true,
@@ -60,6 +60,7 @@ module.exports = function (grunt) {
             'publish-client': {
                 options: {
                     host: 'wsw6.surftown.dk',
+                    authKey: 'key1',
                     port: 21,
                     passive: true
                     // , type: 'ascii'

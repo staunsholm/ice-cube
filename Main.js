@@ -1,4 +1,9 @@
-if (!Detector.webgl) Detector.addGetWebGLMessage();
+if (!Detector.webgl) {
+    document.getElementById('noWebGL').style.display = 'block';
+    document.getElementById('theGame').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('gameOver').style.display = 'none';
+}
 
 var scene, camera, renderer;
 var cameraCube, sceneCube;
@@ -10,7 +15,7 @@ var ball, pad1, pad2;
 var oldt = 0;
 var ballX = 0;
 var ballY = 0;
-setBallDirection(3.14 + Math.random() - 0.5);
+setBallDirection(Math.PI + (Math.random() - 0.5) / 2);
 var initialSpeed = 2;
 var speed = initialSpeed;
 var player1 = {
@@ -42,11 +47,13 @@ var tryAgainButton = document.getElementById('tryAgainButton');
 startGameButton.addEventListener('click', startGame);
 tryAgainButton.addEventListener('click', startGame);
 
-document.getElementById('backToStartButton').addEventListener('click', function () {
+function showStartScreen() {
     document.getElementById('theGame').style.display = 'none';
     document.getElementById('startScreen').style.display = 'block';
     document.getElementById('gameOver').style.display = 'none';
-});
+}
+
+document.getElementById('backToStartButton').addEventListener('click', showStartScreen);
 
 function startGame() {
     document.getElementById('theGame').style.display = 'block';
@@ -94,7 +101,9 @@ var urls = [
 ];
 
 var textureCube = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping());
-material = new THREE.MeshLambertMaterial({ color: 0xaaccff, envMap: textureCube, refractionRatio: 0.95 });
+var greenIceMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00, envMap: textureCube, refractionRatio: 0.95 });
+var redIceMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000, envMap: textureCube, refractionRatio: 0.95 });
+var whiteIceMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, envMap: textureCube, refractionRatio: 0.95 });
 
 var modifier = new THREE.SubdivisionModifier(2);
 geometry = new THREE.CubeGeometry(200, 200, 200, 2, 2, 2);
@@ -104,7 +113,7 @@ geometry.computeFaceNormals();
 geometry.computeVertexNormals();
 modifier.modify(geometry);
 
-function createCube(x, y, z, w, h) {
+function createCube(x, y, z, w, h, material) {
     var iceMesh = new THREE.Mesh(geometry, material);
 
     iceMesh.position.x = x;
@@ -119,9 +128,9 @@ function createCube(x, y, z, w, h) {
     return iceMesh;
 }
 
-pad1 = createCube(-2600, 0, 1, 1, 8);
-pad2 = createCube(2600, 0, 1, 1, 8);
-ball = createCube(0, 0, 1, 1, 1);
+pad1 = createCube(-2600, 0, 1, 1, 8, greenIceMaterial);
+pad2 = createCube(2600, 0, 1, 1, 8, redIceMaterial);
+ball = createCube(0, 0, 1, 1, 1, whiteIceMaterial);
 
 var pointLight = new THREE.PointLight(0xffffff, 2, 0);
 pointLight.position.set(0, 10000, 10000);
@@ -172,7 +181,7 @@ function gameOver() {
     speed = 0;
     ballX = 0;
     ballY = 0;
-    setBallDirection(3.14 + Math.random() - 0.5);
+    setBallDirection(Math.PI + (Math.random() - 0.5) / 2);
 }
 
 function newRound() {
@@ -181,7 +190,7 @@ function newRound() {
     speed = 0;
     ballX = 0;
     ballY = 0;
-    setBallDirection(3.14 + Math.random() - 0.5);
+    setBallDirection(Math.PI + (Math.random() - 0.5) / 2);
 }
 
 function padCheck(player, ball) {
@@ -197,6 +206,7 @@ function padCheck(player, ball) {
 
         if (player1.score >= maxScore || player2.score >= maxScore) {
             gameOver();
+            return;
         }
 
         player1.scoreElement.innerHTML = player1.score;
@@ -205,7 +215,7 @@ function padCheck(player, ball) {
         newRound();
     }
 
-    var newDirection = ballDirection + Math.PI - dy / 1000;
+    var newDirection = ballDirection + Math.PI - dy / 2000;
     if (newDirection > Math.PI / 2 - .5 && newDirection < Math.PI / 2 + .5) {
         newDirection = newDirection > Math.PI / 2 ? Math.PI / 2 + .5 : Math.PI / 2 - .5;
     }
@@ -256,9 +266,11 @@ function animate(t) {
 
     dt += Math.sin(t / 100) * speedWobble;
 
-    camera.position.x = Math.cos(t / 5000) * 8000;
+    var r = Math.cos(t / 2000) / 2 + Math.PI / 2;
+
+    camera.position.x = Math.cos(r) * 8000;
     camera.position.y = mouseY * 4000;
-    camera.position.z = Math.sin(t / 5000) * 8000;
+    camera.position.z = Math.sin(r) * 8000;
     camera.lookAt(scene.position);
     cameraCube.rotation.copy(camera.rotation);
 
